@@ -104,7 +104,12 @@ public class movement : MonoBehaviour
         {
             a.SetBool("Ground", false);
             rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
-
+            // Jump-Dash
+            if (Input.GetKeyDown(KeyCode.X) && grounded)
+                a.SetBool("Dash", true);
+            //Jump Attack
+            if (Input.GetKeyDown(KeyCode.Z))
+                a.SetBool("Attack", true);
             if (!doubleJump && !grounded)
             {
                 doubleJump = true;
@@ -112,7 +117,7 @@ public class movement : MonoBehaviour
         }
 
         //Dashing
-        if(grounded && Input.GetKeyDown(KeyCode.X))
+        else if(grounded && Input.GetKeyDown(KeyCode.X))
         {
             a.SetBool("Dash", true);
         }
