@@ -5,6 +5,8 @@ public class movement : MonoBehaviour
 {
 
     public float maxSpeed = 8f;
+    public float AdjustSpeed;
+    public float dashModifier = 1.5f;
 
     bool grounded = false;
     bool doubleJump = false;
@@ -38,6 +40,8 @@ public class movement : MonoBehaviour
         if (grounded)
             doubleJump = false;
 
+        isDashing();
+
         float move = Input.GetAxis("Horizontal");
 
         ////////////////////////////Lock Movement
@@ -49,7 +53,7 @@ public class movement : MonoBehaviour
 
         a.SetFloat("Speed", Mathf.Abs(move));
         
-        rb.velocity = new Vector2(move * maxSpeed, rb.velocity.y);
+        rb.velocity = new Vector2(move * AdjustSpeed, rb.velocity.y);
 
         if (move > 0 && !facingRight)
             Flip();
@@ -65,13 +69,18 @@ public class movement : MonoBehaviour
         if ((grounded || !doubleJump) && Input.GetKeyDown(KeyCode.Space) && !animationLock())
         {
             a.SetBool("Ground", false);
-            //rb.AddForce(new Vector2(0, jumpForce));
             rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
 
             if (!doubleJump && !grounded)
             {
                 doubleJump = true;
             }
+        }
+
+        //Dashing
+        if(grounded && Input.GetKeyDown(KeyCode.X))
+        {
+            a.SetBool("Dash", true);
         }
 
         //attacks
@@ -100,5 +109,18 @@ public class movement : MonoBehaviour
         }
 
         return false;
+    }
+
+    void isDashing()
+    {
+        if (a.GetBool("Dash"))
+        {
+            AdjustSpeed = maxSpeed * dashModifier;
+        }
+
+        else
+        {
+            AdjustSpeed = maxSpeed;
+        }
     }
 }
