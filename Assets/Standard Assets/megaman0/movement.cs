@@ -52,6 +52,40 @@ public class movement : MonoBehaviour
         ////////////////////////////
 
         a.SetFloat("Speed", Mathf.Abs(move));
+
+        SpriteRenderer[] s = GetComponentsInChildren<SpriteRenderer>();
+        if (a.GetBool("Dash"))
+        {
+            
+            float shadowLag = -0.15f;
+            float dir = shadowLag;
+            if (!facingRight) dir *= -1;
+            foreach (SpriteRenderer i in s)
+            {
+                if (i.name == "Shadow1")
+                {
+                    i.transform.localPosition = new Vector3(dir * (rb.velocity.x / AdjustSpeed), shadowLag * (rb.velocity.y/20));
+                }
+                else if (i.name == "Shadow2")
+                {
+                    i.transform.localPosition = new Vector3(2 * dir * (rb.velocity.x / AdjustSpeed), 2 * shadowLag * (rb.velocity.y/20));
+                }
+            }
+        }
+        else
+        {
+            foreach (SpriteRenderer i in s)
+            {
+                if (i.name == "Shadow1")
+                {
+                    i.transform.localPosition = new Vector3(0, 0);
+                }
+                else if (i.name == "Shadow2")
+                {
+                    i.transform.localPosition = new Vector3(0, 0);
+                }
+            }
+        }
         
         rb.velocity = new Vector2(move * AdjustSpeed, rb.velocity.y);
 
