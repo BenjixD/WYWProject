@@ -15,6 +15,7 @@ public class movement : MonoBehaviour
     public LayerMask whatIsGround;
     public float jumpForce = 950f;
     public float jumpSpeed = 20f;
+    Vector2[] prevFrames = new Vector2[5];
 
 
 
@@ -31,8 +32,9 @@ public class movement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
-
+        
         grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
         a.SetBool("Ground", grounded);
         a.SetFloat("vSpeed", rb.velocity.y);
@@ -53,22 +55,21 @@ public class movement : MonoBehaviour
 
         a.SetFloat("Speed", Mathf.Abs(move));
 
+        shadowUpdate(rb, a.GetBool("Dash"));
+
         SpriteRenderer[] s = GetComponentsInChildren<SpriteRenderer>();
         if (a.GetBool("Dash"))
         {
             
-            float shadowLag = -0.15f;
-            float dir = shadowLag;
-            if (!facingRight) dir *= -1;
             foreach (SpriteRenderer i in s)
             {
                 if (i.name == "Shadow1")
                 {
-                    i.transform.localPosition = new Vector3(dir * (rb.velocity.x / AdjustSpeed), shadowLag * (rb.velocity.y/20));
+                    i.transform.position = prevFrames[2];
                 }
                 else if (i.name == "Shadow2")
                 {
-                    i.transform.localPosition = new Vector3(2 * dir * (rb.velocity.x / AdjustSpeed), 2 * shadowLag * (rb.velocity.y/20));
+                    i.transform.position = prevFrames[4];
                 }
             }
         }
@@ -86,6 +87,8 @@ public class movement : MonoBehaviour
                 }
             }
         }
+
+        hitCheck();
         
         rb.velocity = new Vector2(move * AdjustSpeed, rb.velocity.y);
 
@@ -109,7 +112,7 @@ public class movement : MonoBehaviour
                 a.SetBool("Dash", true);
             //Jump Attack
             if (Input.GetKeyDown(KeyCode.Z))
-                a.SetBool("Attack", true);
+                a.SetBool("attack", true);
             if (!doubleJump && !grounded)
             {
                 doubleJump = true;
@@ -117,7 +120,7 @@ public class movement : MonoBehaviour
         }
 
         //Dashing
-        else if(grounded && Input.GetKeyDown(KeyCode.X))
+        else if(grounded && !animationLock() && Input.GetKeyDown(KeyCode.X))
         {
             a.SetBool("Dash", true);
         }
@@ -142,7 +145,8 @@ public class movement : MonoBehaviour
         if(a.GetCurrentAnimatorStateInfo(0).IsName("neutral1") ||
            a.GetCurrentAnimatorStateInfo(0).IsName("neutral2") ||
            a.GetCurrentAnimatorStateInfo(0).IsName("neutral3") ||
-           a.GetCurrentAnimatorStateInfo(0).IsName("sheathe"))
+           a.GetCurrentAnimatorStateInfo(0).IsName("sheathe") ||
+           a.GetCurrentAnimatorStateInfo(0).IsName("landState"))
         {
             return true;
         }
@@ -161,5 +165,31 @@ public class movement : MonoBehaviour
         {
             AdjustSpeed = maxSpeed;
         }
+    }
+
+    void shadowUpdate(Rigidbody2D rb, bool Dash)
+    {
+        if (!Dash)
+        {
+            for (int i = 0; i < prevFrames.Length; i++)
+            {
+                prevFrames[i] = rb.position;
+            }
+            return;
+        }
+
+        for (int i = prevFrames.Length - 1; i > 0; i--)
+        {
+            prevFrames[i] = prevFrames[i - 1];
+        }
+        prevFrames[0] = rb.position;
+    }
+
+    void hitCheck()
+    {
+        Collider2D hitbox = GetComponent<Collider2D>();
+        Collider2D turretShot = GameObject.Find("TurretDummy").GetComponent<CircleCollider2D>();
+        if (hitbox.IsTouching(turretShot)) a.SetBool("hit", true);
+        else a.SetBool("hit", false);
     }
 }
