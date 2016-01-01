@@ -35,8 +35,8 @@ public class movement : MonoBehaviour
         
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         
-        grounded = Physics2D.OverlapArea(new Vector3(groundCheck.position.x - 0.2f, groundCheck.position.y - 0.2f), 
-                                         new Vector3(groundCheck.position.x + 0.2f, groundCheck.position.y + 0.2f), 
+        grounded = Physics2D.OverlapArea(new Vector3(groundCheck.position.x - 0.25f, groundCheck.position.y - 0.2f), 
+                                         new Vector3(groundCheck.position.x + 0.25f, groundCheck.position.y + 0.2f), 
                                          whatIsGround);
         a.SetBool("Ground", grounded);
         a.SetFloat("vSpeed", rb.velocity.y);
@@ -45,6 +45,9 @@ public class movement : MonoBehaviour
             doubleJump = false;
 
         isDashing();
+
+        float move = Input.GetAxis("Horizontal");
+        a.SetFloat("Speed", Mathf.Abs(move));
 
         ////////////////////////////hill adjusters
         if (Mathf.Abs(a.GetFloat("Speed")) < 0.1f && grounded)
@@ -100,9 +103,6 @@ public class movement : MonoBehaviour
 
         hitCheck();
 
-
-        float move = Input.GetAxis("Horizontal");
-        a.SetFloat("Speed", Mathf.Abs(move));
         rb.velocity = new Vector2(move * AdjustSpeed, rb.velocity.y);
 
         if (move > 0 && !facingRight)
