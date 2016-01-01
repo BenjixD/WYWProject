@@ -46,64 +46,28 @@ public class movement : MonoBehaviour
 
         isDashing();
 
+        //Horizontal Directional Input
         float move = Input.GetAxis("Horizontal");
-        a.SetFloat("Speed", Mathf.Abs(move));
-
-        ////////////////////////////hill adjusters
-        if (Mathf.Abs(a.GetFloat("Speed")) < 0.1f && grounded)
-       {
-            rb.gravityScale = 0;
-       }
-
-       else
-       {
-            rb.gravityScale = 2;
-       }
-        ////////////////////////////
 
         ////////////////////////////Lock Movement
         if (animationLock())
         {
+            move = 0.0f;
+            a.SetFloat("Speed", Mathf.Abs(move));
+            hillAdjuster(rb);
             return;
-        } 
+        }
         ////////////////////////////
-
+             
+        a.SetFloat("Speed", Mathf.Abs(move));
         shadowUpdate(rb, a.GetBool("Dash"));
+        transformShadows();
 
-        SpriteRenderer[] s = GetComponentsInChildren<SpriteRenderer>();
-        if (a.GetBool("Dash"))
-        {
-            
-            foreach (SpriteRenderer i in s)
-            {
-                if (i.name == "Shadow1")
-                {
-                    i.transform.position = prevFrames[2];
-                }
-                else if (i.name == "Shadow2")
-                {
-                    i.transform.position = prevFrames[4];
-                }
-            }
-        }
-        else
-        {
-            foreach (SpriteRenderer i in s)
-            {
-                if (i.name == "Shadow1")
-                {
-                    i.transform.localPosition = new Vector3(0, 0);
-                }
-                else if (i.name == "Shadow2")
-                {
-                    i.transform.localPosition = new Vector3(0, 0);
-                }
-            }
-        }
-
+        hillAdjuster(rb);
         hitCheck();
 
         rb.velocity = new Vector2(move * AdjustSpeed, rb.velocity.y);
+        
 
         if (move > 0 && !facingRight)
             Flip();
@@ -182,6 +146,7 @@ public class movement : MonoBehaviour
 
     void shadowUpdate(Rigidbody2D rb, bool Dash)
     {
+        //Fill Frames with current location if not dashing
         if (!Dash)
         {
             for (int i = 0; i < prevFrames.Length; i++)
@@ -191,12 +156,49 @@ public class movement : MonoBehaviour
             return;
         }
 
+        //Update Previous Frames list
         for (int i = prevFrames.Length - 1; i > 0; i--)
         {
-            prevFrames[i] = prevFrames[i - 1];
+             prevFrames[i] = prevFrames[i - 1];
         }
         prevFrames[0] = rb.position;
     }
+
+    void transformShadows()
+    {
+        //Update Shadow Positions
+        SpriteRenderer[] s = GetComponentsInChildren<SpriteRenderer>();
+        if (a.GetBool("Dash"))
+        {
+            foreach (SpriteRenderer i in s)
+            {
+                if (i.name == "Shadow1")
+                {
+                    i.transform.position = prevFrames[2];
+                }
+                else if (i.name == "Shadow2")
+                {
+                    i.transform.position = prevFrames[4];
+                }
+            }
+        }
+
+        else
+        {
+            foreach (SpriteRenderer i in s)
+            {
+                if (i.name == "Shadow1")
+                {
+                    i.transform.localPosition = new Vector3(0, 0);
+                }
+                else if (i.name == "Shadow2")
+                {
+                    i.transform.localPosition = new Vector3(0, 0);
+                }
+            }
+        }
+    }
+
 
     void hitCheck()
     {
@@ -204,5 +206,20 @@ public class movement : MonoBehaviour
         Collider2D turretShot = GameObject.Find("TurretDummy").GetComponent<CircleCollider2D>();
         if (hitbox.IsTouching(turretShot)) a.SetBool("hit", true);
         else a.SetBool("hit", false);
+    }
+
+    void hillAdjuster(Rigidbody2D rb)
+    {
+        ////////////////////////////hill adjusters
+        if (Mathf.Abs(a.GetFloat("Speed")) < 0.1f && grounded)
+        {
+            rb.gravityScale = 0;
+        }
+
+        else
+        {
+            rb.gravityScale = 2;
+        }
+        ////////////////////////////
     }
 }
