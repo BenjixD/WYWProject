@@ -11,7 +11,7 @@ public class movement : MonoBehaviour
     bool grounded = false;
     bool doubleJump = false;
     public Transform groundCheck;
-    float groundRadius = 0.12f;
+    //float groundRadius = 0.12f;
     public LayerMask whatIsGround;
     public float jumpForce = 950f;
     public float jumpSpeed = 20f;
@@ -35,7 +35,9 @@ public class movement : MonoBehaviour
         
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         
-        grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+        grounded = Physics2D.OverlapArea(new Vector3(groundCheck.position.x - 0.2f, groundCheck.position.y - 0.2f), 
+                                         new Vector3(groundCheck.position.x + 0.2f, groundCheck.position.y + 0.2f), 
+                                         whatIsGround);
         a.SetBool("Ground", grounded);
         a.SetFloat("vSpeed", rb.velocity.y);
 
@@ -44,7 +46,17 @@ public class movement : MonoBehaviour
 
         isDashing();
 
-        float move = Input.GetAxis("Horizontal");
+        ////////////////////////////hill adjusters
+        if (Mathf.Abs(a.GetFloat("Speed")) < 0.1f && grounded)
+       {
+            rb.gravityScale = 0;
+       }
+
+       else
+       {
+            rb.gravityScale = 2;
+       }
+        ////////////////////////////
 
         ////////////////////////////Lock Movement
         if (animationLock())
@@ -52,8 +64,6 @@ public class movement : MonoBehaviour
             return;
         } 
         ////////////////////////////
-
-        a.SetFloat("Speed", Mathf.Abs(move));
 
         shadowUpdate(rb, a.GetBool("Dash"));
 
@@ -89,7 +99,10 @@ public class movement : MonoBehaviour
         }
 
         hitCheck();
-        
+
+
+        float move = Input.GetAxis("Horizontal");
+        a.SetFloat("Speed", Mathf.Abs(move));
         rb.velocity = new Vector2(move * AdjustSpeed, rb.velocity.y);
 
         if (move > 0 && !facingRight)

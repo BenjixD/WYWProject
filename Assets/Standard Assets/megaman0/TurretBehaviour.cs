@@ -24,9 +24,8 @@ public class TurretBehaviour : MonoBehaviour {
     void Flip()
     {
         facingRight = !facingRight;
-        Collider2D hitbox = GetComponent<CircleCollider2D>();
-        
-        hitbox.offset = new Vector2(hitbox.offset.x * -1, hitbox.offset.y);
+        //Collider2D hitbox = GetComponent<CircleCollider2D>();       
+        //hitbox.offset = new Vector2(hitbox.offset.x * -1, hitbox.offset.y);
         Vector3 scale = transform.localScale;
         scale.x *= -1;
         transform.localScale = scale;
