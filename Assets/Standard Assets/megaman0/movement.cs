@@ -44,6 +44,7 @@ public class movement : MonoBehaviour
         if (grounded)
             doubleJump = false;
 
+        hitCheck();
         isDashing();
 
         //Horizontal Directional Input
@@ -64,7 +65,6 @@ public class movement : MonoBehaviour
         transformShadows();
 
         hillAdjuster(rb);
-        hitCheck();
 
         rb.velocity = new Vector2(move * AdjustSpeed, rb.velocity.y);
         
@@ -123,7 +123,8 @@ public class movement : MonoBehaviour
            a.GetCurrentAnimatorStateInfo(0).IsName("neutral2") ||
            a.GetCurrentAnimatorStateInfo(0).IsName("neutral3") ||
            a.GetCurrentAnimatorStateInfo(0).IsName("sheathe") ||
-           a.GetCurrentAnimatorStateInfo(0).IsName("landState"))
+           a.GetCurrentAnimatorStateInfo(0).IsName("landState") ||
+           a.GetCurrentAnimatorStateInfo(0).IsName("hit"))
         {
             return true;
         }
@@ -199,15 +200,6 @@ public class movement : MonoBehaviour
         }
     }
 
-
-    void hitCheck()
-    {
-        Collider2D hitbox = GetComponent<Collider2D>();
-        Collider2D turretShot = GameObject.Find("TurretDummy").GetComponent<CircleCollider2D>();
-        if (hitbox.IsTouching(turretShot)) a.SetBool("hit", true);
-        else a.SetBool("hit", false);
-    }
-
     void hillAdjuster(Rigidbody2D rb)
     {
         ////////////////////////////hill adjusters
@@ -221,5 +213,21 @@ public class movement : MonoBehaviour
             rb.gravityScale = 2;
         }
         ////////////////////////////
+    }
+
+    void OnCollisionStay2D(Collision2D coll)
+    {
+        if(coll.gameObject.tag == "Enemy" || coll.gameObject.tag == "EnemyProjectile")
+        {
+            a.SetBool("hit", true);
+        }
+    }
+
+    void hitCheck()
+    {
+        if (a.GetBool("hit"))
+        {
+            //a.SetBool("hit", false);
+        }
     }
 }
